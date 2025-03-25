@@ -1,0 +1,10 @@
+<svg width="300" height="70" viewBox="0 0 300 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Circle with Cross Inside -->
+  <circle cx="30" cy="35" r="20" fill="#5F6FFF"/>
+  <!-- Medical cross inside circle -->
+  <rect x="25" y="30" width="10" height="4" fill="white"/>
+  <rect x="28" y="27" width="4" height="10" fill="white"/>
+  
+  <!-- Text with enhanced styling -->
+  <text x="80" y="45" font-family="Arial" font-size="26" font-weight="bold" fill="#5F6FFF">AI DOC FINDER</text>
+</svg>
