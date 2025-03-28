@@ -1,33 +1,55 @@
 import { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function VideoConsultation() {
   const [meetingUrl, setMeetingUrl] = useState("");
+  const [appointmentData, setAppointmentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleGoLive = async () => {
     setLoading(true);
     setError("");
     try {
-      // Fetch appointment details (doctor ID, patient ID, patient email)
+      // Fetch appointment details (doctor ID, patient ID, patient email, etc.)
       const appointmentRes = await axios.post("http://localhost:4000/api/user/book-appointment");
-      const { docId, userId, userData } = appointmentRes.data;
-
-      // Generate Zoom meeting
-      const zoomRes = await axios.post("http://localhost:4000/api/zoom/meeting", {
-        doctorId: docId,
-        patientId: userId,
-        patientEmail: userData.email,
-      });
-
-      setMeetingUrl(zoomRes.data.meeting_url);
-      console.log("meetingUrl", meetingUrl)
+      const data = appointmentRes.data;
+      if (data && data.docId && data.userId && data.userData?.email) {
+        setAppointmentData(data);
+  
+        // Generate Zoom meeting
+        const zoomRes = await axios.post("http://localhost:4000/api/zoom/meeting", {
+          doctorId: data.docId,
+          patientId: data.userId,
+          patientEmail: data.userData.email,
+        });
+  
+        if (zoomRes.data?.meeting_url) {
+          setMeetingUrl(zoomRes.data.meeting_url);
+        } else {
+          setError("Failed to retrieve meeting URL.");
+        }
+      } else {
+        setError("Invalid appointment data received.");
+      }
     } catch (err) {
       setError("Failed to create Zoom meeting. Try again.");
       console.error("Zoom Error:", err.response?.data || err.message);
     }
     setLoading(false);
+  };
+
+  const handleViewMedicalRecords = () => {
+    if (appointmentData && !isNaN(Number(appointmentData.userId))) {
+      // Navigate to the doctor's medical records module with patient data.
+      navigate(`/doctor/medical-records/${appointmentData.userId}`, { 
+        state: { patient: appointmentData.userData } 
+      });
+    } else {
+      setError("Invalid appointment data. Cannot view medical records.");
+    }
   };
 
   return (
@@ -53,6 +75,15 @@ export default function VideoConsultation() {
             Join Meeting
           </a>
         </div>
+      )}
+
+      {appointmentData && (
+        <button
+          onClick={handleViewMedicalRecords}
+          className="mt-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400"
+        >
+          Records
+        </button>
       )}
 
       {error && <p className="text-red-500 mt-4">{error}</p>}

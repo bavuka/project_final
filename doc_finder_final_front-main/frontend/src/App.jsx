@@ -18,6 +18,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Hero from './pages/Hero';
 import Programs from './pages/programs';
+import VisitedDoctors from './components/VisitedDoctors';
+import MedicalRecords from './components/MedicalRecords';
 
 
 
@@ -47,6 +49,8 @@ const App = () => {
         <Route path='/my-appointments' element={<MyAppointments />} />
         <Route path='/my-profile' element={<MyProfile />} />
         <Route path='/verify' element={<Verify />} />
+        <Route path="/visited-doctors" element={<VisitedDoctors />} />
+        <Route path="/medical-records/:doctorId" element={<MedicalRecords />} />
        
        
       </Routes>

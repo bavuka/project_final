@@ -1,5 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 import { DoctorContext } from "../../context/DoctorContext";
 import { assets } from "../../assets/assets";
 import { AppContext } from "../../context/AppContext";
@@ -8,6 +9,7 @@ const DoctorDashboard = () => {
   const { dToken, dashData, getDashData, cancelAppointment, completeAppointment } =
     useContext(DoctorContext);
   const { slotDateFormat, currency } = useContext(AppContext);
+  const navigate = useNavigate();
 
   const [meetingUrls, setMeetingUrls] = useState({}); // Store meeting links for each appointment
 
@@ -35,6 +37,13 @@ const DoctorDashboard = () => {
     } catch (err) {
       console.error("Zoom Error:", err.response?.data || err.message);
     }
+  };
+
+  // Function to navigate to the doctor's medical records view
+  const handleViewRecords = (item) => {
+    navigate(`/doctor/medical-records/${item.userId}`, {
+      state: { patient: item.userData },
+    });
   };
 
   return (
@@ -84,7 +93,9 @@ const DoctorDashboard = () => {
                 <img className="rounded-full w-10" src={item.userData.image} alt="User" />
                 <div className="flex-1 text-sm">
                   <p className="text-gray-800 font-medium">{item.userData.name}</p>
-                  <p className="text-gray-600">Booking on {slotDateFormat(item.slotDate)}</p>
+                  <p className="text-gray-600">
+                    Booking on {slotDateFormat(item.slotDate)}
+                  </p>
                 </div>
 
                 {/* Show status or actions */}
@@ -107,7 +118,7 @@ const DoctorDashboard = () => {
                       src={assets.tick_icon}
                       alt="Complete"
                     />
-
+                    
                     {/* Go Live or Join Meeting Button */}
                     {!meetingUrls[item._id] ? (
                       <button
@@ -126,6 +137,14 @@ const DoctorDashboard = () => {
                         Join Meeting
                       </a>
                     )}
+
+                    {/* New Records Button */}
+                    <button
+                      onClick={() => handleViewRecords(item)}
+                      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-xs"
+                    >
+                      Records
+                    </button>
                   </div>
                 )}
               </div>
