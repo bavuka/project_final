@@ -29,7 +29,7 @@ const sendAppointmentNotification = async (patientEmail, appointmentData) => {
             from: process.env.EMAIL_USER,
             to: patientEmail,
             subject: "Appointment Confirmation - AI DOC FINDER",
-            text: `Dear Patient,\n\nYour appointment has been successfully booked.\n\nDoctor: ${appointmentDetails.doctor}\nDate: ${appointmentDetails.date}\nTime: ${appointmentDetails.time}\n\nThank you for choosing AI DOC FINDER.`,
+            text: `Dear Patient,\n\nYour appointment has been successfully booked.\n\nDoctor: ${appointmentData.doctor}\nDate: ${appointmentData.date}\nTime: ${appointmentData.time}\n\nThank you for choosing AI DOC FINDER.`,
         };
 
         const info = await transporter.sendMail(mailOptions);
@@ -40,5 +40,22 @@ const sendAppointmentNotification = async (patientEmail, appointmentData) => {
         return { success: false, message: "Failed to send email", error: error.message };
     }
 };
+const sendReminderEmail = async (patientEmail, appointmentData) => {
+    try {
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: patientEmail,
+            subject: "Appointment Reminder - AI DOC FINDER",
+            text: `Dear Patient,\n\nThis is a reminder for your upcoming appointment.\n\nDoctor: ${appointmentData.doctor}\nDate: ${appointmentData.date}\nTime: ${appointmentData.time}\n\nPlease be on time.\n\nThank you for choosing AI DOC FINDER.`,
+        };
 
+        const info = await transporter.sendMail(mailOptions);
+        console.log("✅ Reminder email sent successfully:", info.response);
+        return { success: true, message: "Email sent successfully" };
+    } catch (error) {
+        console.error("❌ Failed to send reminder email:", error);
+        return { success: false, message: "Failed to send email", error: error.message };
+    }
+};
 export default sendAppointmentNotification;
+export {sendReminderEmail};

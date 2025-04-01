@@ -7,6 +7,8 @@ import Appointment from "../models/appointmentModel.js";
 import { v2 as cloudinary } from "cloudinary";
 import stripe from "stripe";
 import razorpay from "razorpay";
+import sendAppointmentNotification from "../controllers/emailController.js";
+import appointmentQueue from "../services/queue.js";
 
 // Gateway Initialize
 const stripeInstance = new stripe(process.env.STRIPE_SECRET_KEY);
@@ -172,8 +174,49 @@ const bookAppointment = async (req, res) => {
 
     // Save updated slots data in doctor record
     await Doctor.update({ slots_booked }, { where: { id: docId } });
+        // Send email notification
+    const emailResponse = await sendAppointmentNotification(userData.email, {
+          doctor: docDataPlain.name, 
+          date: slotDate,
+          time: slotTime,
+        });
+    console.log("Slot Date:", slotDate);  // Log the raw slotDate
+    console.log("Slot Time:", slotTime);
+// Convert slotDate from "1_4_2025" to "2025-01-04"
+const formattedDate = slotDate.replace(/_/g, '-');
+const [day, month, year] = formattedDate.split('-');
+const correctDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`; // Ensure it's in the "YYYY-MM-DD" format
 
-    res.json({ success: true, data: appointmentData });
+// Convert slotTime from "06:00 PM" to 24-hour format "18:00"
+const convertTo24Hour = (time12hr) => {
+  const [time, modifier] = time12hr.split(' ');
+  let [hours, minutes] = time.split(':').map(num => parseInt(num, 10));
+  
+  if (modifier === 'PM' && hours !== 12) hours += 12;
+  if (modifier === 'AM' && hours === 12) hours = 0;
+  
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+};
+
+const formattedTime = convertTo24Hour(slotTime);
+const appointmentDateTime = new Date(`${correctDate}T${formattedTime}:00`);
+
+
+const localTimeOffset = appointmentDateTime.getTimezoneOffset() * 60000;
+const localAppointmentDateTime = new Date(appointmentDateTime.getTime() - localTimeOffset);
+const reminderTime = new Date(localAppointmentDateTime.getTime() - 30 * 60000);
+
+
+console.log("Appointment DateTime (Local):", localAppointmentDateTime);
+console.log("Reminder Time (Local):", reminderTime);
+    
+    await appointmentQueue.add(
+          "sendReminder",
+          { patientEmail: userData.email, appointmentData: { doctor: docDataPlain.name, date: correctDate, time: formattedTime} },
+          { delay: reminderTime.getTime() - Date.now() }
+        );
+
+        res.json({ success: true, data: appointmentData, emailStatus: emailResponse });
   } catch (error) {
     console.error(error);
     res.json({ success: false, message: error.message });

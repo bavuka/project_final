@@ -120,16 +120,16 @@ const DoctorDashboard = () => {
                     />
                     
                     {/* Go Live or Join Meeting Button */}
-                    {!meetingUrls[item._id] ? (
+                    {!meetingUrls[item.id] ? (
                       <button
-                        onClick={() => handleGoLive(item._id, item)}
+                        onClick={() => handleGoLive(item.id, item)}
                         className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-xs"
                       >
                         Go Live
                       </button>
                     ) : (
                       <a
-                        href={meetingUrls[item._id]}
+                        href={meetingUrls[item.id]}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-xs"

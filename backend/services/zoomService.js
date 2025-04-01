@@ -42,6 +42,7 @@ const generateZoomAccessToken = async () => {
         password: "123456",
         settings: {
           allow_multiple_devices: true,
+          max_participants: 1,
           alternative_hosts_email_notification: true,
           contact_email: "bavukakayalot@gmail.com",
           contact_name: "Bavuka K",

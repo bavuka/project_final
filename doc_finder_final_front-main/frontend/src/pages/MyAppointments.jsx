@@ -62,7 +62,7 @@ const MyAppointments = () => {
             currency: order.currency,
             name: 'Appointment Payment',
             description: "Appointment Payment",
-            order: order.id,
+            order_id: order.id,
             receipt: order.receipt,
             handler: async (response) => {
 
